@@ -8,6 +8,8 @@ public class MousePosition {
     private int NUM = 150;
     private Vector3 _oldPos;
     public bool updating = false;
+    private int _index = 0;
+    public bool isFinish=false;
     
     public void Init(int nn){
 
@@ -20,7 +22,7 @@ public class MousePosition {
 
     }
 
-    public void Upadate(Camera camera){
+    public void Upadate(Camera camera, float dist){
 
         if ( Input.GetMouseButton (0) || Input.touchCount > 0) {
             
@@ -41,16 +43,16 @@ public class MousePosition {
             #endif
 
             
-            screen_point.z = 1.0f;
+            screen_point.z = dist;//1.0f;
 
-            var sub = screen_point - _oldPos;
-            if( sub.magnitude > 50f){
+                
+            var pos = camera.ScreenToWorldPoint (screen_point);
+            var sub = pos - _oldPos;     
 
+            if( sub.magnitude > 0.02f){
+
+                _oldPos = pos;
                 updating=true;
-
-                _oldPos = screen_point;
-
-                var pos = camera.ScreenToWorldPoint (screen_point);
 
                 if(_positions.Count==0){
 
@@ -60,11 +62,24 @@ public class MousePosition {
 
                 }
 
-
                 //追加してる。最初に追加しちゃおう
-                if(_positions.Count>=NUM)_positions.RemoveAt(_positions.Count-1);
-                _positions.Insert(0,pos);
-                
+                //if(_positions.Count>=NUM){
+                    //_positions.RemoveAt(_positions.Count-1);
+                    //_positions.RemoveAt(0);
+                //}
+                //_positions.Insert(0,pos);
+
+                var currentIndex = _index%_positions.Count;
+                _positions[ currentIndex ] = pos;
+                for(int i=currentIndex+1;i<NUM;i++){
+                    _positions[ i ] = pos;
+                }
+                _index++;
+
+                if(_index>=NUM){
+                    isFinish=true;
+                }
+
             }
 
             //Debug.Log ("ワールド座標" + camera.ScreenToWorldPoint (screen_point));

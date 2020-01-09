@@ -1,18 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class TubeBrush : BrushBase{
+public class TubeBrushOld : BrushBase{
 
     private Mesh _mesh;
     [SerializeField] private Mesh _srcMesh;
     [SerializeField] private Vector3[] _vertices;
+    [SerializeField] private Vector4[] _tangents;
     [SerializeField] private List<Vector3> _positions;
     [SerializeField] private Vector3 _pos;
     [SerializeField] private float _debugLength = 1f;
     [SerializeField] private float _width = 1f;
-    private Vector3[] _tangents;    
     private Vector3[] _normals;
     private Vector3[] _binormals;
     [SerializeField] private Camera _camera;
@@ -25,7 +24,6 @@ public class TubeBrush : BrushBase{
     private bool _isHide = false;
     private bool _isInit = false;
     [SerializeField] private MeshRenderer _renderer;
-    [SerializeField] private Slider _slider;
 
     public void Init(){
 
@@ -74,11 +72,10 @@ public class TubeBrush : BrushBase{
         _mesh.RecalculateNormals();
         _mesh.RecalculateTangents();
 
-        _normals    = new Vector3[W+1];
-        _tangents   = new Vector3[W+1];
-        _binormals = new Vector3[W+1];
+        _normals    = _mesh.normals;
+        _tangents   = _mesh.tangents;
         //_tangents   = new Vector3[_mesh.tangents.Length]; 
-        //var tangents = _mesh.tangents;
+        var tangents = _mesh.tangents;
 
         Debug.Log("-------");
         Debug.Log(_vertices.Length);
@@ -102,10 +99,6 @@ public class TubeBrush : BrushBase{
 
     }
 
-    void OnGUI(){
-		GUI.Label (new Rect (50, 50, 100, 100), _slider.value+""); //テキスト表示
-	}
-
 
     public void Hide(){
         _isHide=true;
@@ -126,11 +119,9 @@ public class TubeBrush : BrushBase{
         //}
 
         //if(updating){
-            _mouse.Upadate(_camera, _slider.value);
+            _mouse.Upadate(_camera,1f);
             _positions = _mouse._positions;
         //}
-
-        if(_mouse.isFinish) Hide();
 
         if(_positions.Count==0){
             
@@ -148,9 +139,8 @@ public class TubeBrush : BrushBase{
 
         for(int i=0;i<W+1;i++){
             
-            var v = _positions[i+1] - _positions[i];
+            var v = _positions[i] - _positions[i+1];
             _tangents[i] = v;
-            _tangents[i].Normalize();
 
         }
 
@@ -170,78 +160,49 @@ public class TubeBrush : BrushBase{
 
             //tangent（接線）を取得
             var tangent = _tangents[i];
+            
+            //tangentを使って、ノーマルを計算準備
+            var tx = Mathf.Abs(tangent.x);
+            var ty = Mathf.Abs(tangent.y);
+            var tz = Mathf.Abs(tangent.z);
+
+            //ノーマルを計算準備
             var normal = new Vector3();
-            var binormal = new Vector3();
-
-            if( i == 0 ){
-
-                //tangentを使って、ノーマルを計算準備
-                var tx = Mathf.Abs(tangent.x);
-                var ty = Mathf.Abs(tangent.y);
-                var tz = Mathf.Abs(tangent.z);
-
-                //ノーマルを計算準備
-                var min = float.MaxValue;
-                if (tx < min) {
-                    min = tx;
-                    normal.Set(1, 0, 0);
-                }
-                if (ty < min) {
-                    min = ty;
-                    normal.Set(0, 1, 0);
-                }
-                if (tz < min) {
-                    normal.Set(0, 0, 1);
-                }            
-
-                //
-                var vec = Vector3.Cross(tangent, normal).normalized;
-                
-                //最終的なノーマル計算
-                normal = Vector3.Cross(tangent, vec);
-                _normals[i] = normal;
-                //バイノーマルは、接戦と法線のクロス
-                _binormals[i] = Vector3.Cross(tangent, normal);
-                
-            }else{
-
-                _normals[ i ] = _normals[ i - 1 ];
-                _binormals[ i ] = _binormals[ i - 1 ];
-                var vec = Vector3.Cross( _tangents[ i - 1 ], _tangents[ i ] );
-                float epsilon = 0.0001f;
-                if ( vec.magnitude > epsilon ) {
-                    vec.Normalize();
-                    float dot = Vector3.Dot(_tangents[i-1],_tangents[i]);
-                    if(dot<-1)dot=-1;
-                    if(dot>1)dot=1;
-                    float theta = Mathf.Acos(dot);
-                    // anselm normals[ i ].applyMatrix4( makeRotationAxis( vec, theta ) );
-                   _normals[ i ] = makeRotationAxis(vec,theta).MultiplyVector ( _normals[i] );
-                    
-                }
-                _binormals[i] = Vector3.Cross (_tangents[i],_normals[i]);
-		
+            var min = float.MaxValue;
+            if (tx < min) {
+                min = tx;
+                normal.Set(1, 0, 0);
             }
+            if (ty < min) {
+                min = ty;
+                normal.Set(0, 1, 0);
+            }
+            if (tz < min) {
+                normal.Set(0, 0, 1);
+            }            
 
-            normal = _normals[i];
-            binormal = _binormals[i];
+            //
+            var vec = Vector3.Cross(tangent, normal).normalized;
+            
+            //最終的なノーマル計算
+            normal = Vector3.Cross(tangent, vec);
 
+            //バイノーマルは、接戦と法線のクロス
+            var binormal = Vector3.Cross(tangent, normal);
+            
             normal.Normalize();
             binormal.Normalize();
-
 
             var basePos = _positions[i];
 
             for(int j=0; j<H+1; j++){
 
                 float rad = 1f * (float)j / (float)H * (Mathf.PI * 2f);
-                float cos = Mathf.Cos(-rad + Mathf.PI * 0.5f);
-                float sin = Mathf.Sin(-rad + Mathf.PI * 0.5f); 
+                float cos = Mathf.Cos(rad + Mathf.PI * 0.5f);
+                float sin = Mathf.Sin(rad + Mathf.PI * 0.5f); 
 
                 //normal と binormal 方向に。
-                float ww = i==0 ? 0 : _width;
-
-                Vector3 v = ww * (
+                Vector3 v = _width * (
                     cos * normal + sin * binormal
                 ).normalized;
 
@@ -254,7 +215,7 @@ public class TubeBrush : BrushBase{
 
             //debug用
             Debug.DrawLine (basePos, basePos + 0.1f * normal, Color.red);
-            Debug.DrawLine (basePos, basePos + 0.1f * tangent, Color.green);
+            Debug.DrawLine (basePos, basePos + 0.5f * new Vector3(tangent.x,tangent.y,tangent.z), Color.green);
             Debug.DrawLine (basePos, basePos + 0.1f * binormal, Color.blue);
 
         }
@@ -287,24 +248,6 @@ public class TubeBrush : BrushBase{
         */
 
     }
-
-	Matrix4x4 makeRotationAxis(Vector3 axis, float angle) { // XXX ANSELM TODO - implication of NEW? also row/order?
-	
-		Matrix4x4 mat = new Matrix4x4();
-	
-		float c = Mathf.Cos( angle );
-		float s = Mathf.Sin( angle );
-		float t = 1 - c;
-		float x = axis.x, y = axis.y, z = axis.z;
-		float tx = t * x, ty = t * y;
-
-		mat.SetRow (0,new Vector3(tx * x + c    , tx * y - s * z, tx * z + s * y ));
-		mat.SetRow (1,new Vector3(tx * y + s * z, ty * y + c,     ty * z - s * x ));
-		mat.SetRow (2,new Vector3(tx * z - s * y, ty * z + s * x, t * z * z + c  ));
-		mat.SetRow (3,new Vector4(0,0,0,1));
-
-		return mat;		
-	}    
 
 
 }

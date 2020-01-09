@@ -7,9 +7,9 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: New Material
-  m_Shader: {fileID: 4800000, guid: c9f05979b48b844ac9757f2ac99aac67, type: 3}
-  m_ShaderKeywords: _SPECULARHIGHLIGHTS_OFF
+  m_Name: Soap Bubble
+  m_Shader: {fileID: 4800000, guid: fce7f891f0f0a4ad6ab77adc0600c740, type: 3}
+  m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -19,6 +19,14 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AlphaCube:
+        m_Texture: {fileID: 8900000, guid: c31787c591e967448af1acd66ab062d8, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AlphaCubemap:
+        m_Texture: {fileID: 8900000, guid: 99553fbee63304accabcc69505536b8a, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -44,7 +52,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 58d2cdfce9bfb436eb986a6ad3947c67, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -59,33 +67,31 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SpecGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Amount: 0.05
+    - _Bias: -5
     - _BumpScale: 1
+    - _Color: 0.1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _Distance: 10
     - _DstBlend: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.41
+    - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Metallic: 0.56
+    - _Metallic: 0
     - _Mode: 0
+    - _Mult: 1
     - _OcclusionStrength: 1
+    - _OffsetX: 0
+    - _OffsetY: 256
     - _Parallax: 0.02
-    - _RelativeRefractionIndex: 0.67
-    - _Shininess: 0.078125
+    - _Power: 3.1
+    - _RimPower: 6.1
+    - _Scale: 3.8
     - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 0
+    - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0.83137256, b: 0, a: 1}
-    - _ReflectColor: {r: 0.41509432, g: 0.41509432, b: 0.41509432, a: 0.5}
-    - _SpecColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
