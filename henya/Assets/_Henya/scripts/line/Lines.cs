@@ -7,15 +7,19 @@ public class Lines : MonoBehaviour
 
 
     private List<TubeBrush> _lines;
-    [SerializeField] private TubeBrush _prefab;
+    [SerializeField] private TubeBrush[] _prefabs;
     private TubeBrush _current;
+    private int _index = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         
         _lines = new List<TubeBrush>();
-        _prefab.gameObject.SetActive(false);
+        
+        for(int i=0;i<_prefabs.Length;i++){
+            _prefabs[i].gameObject.SetActive(false);
+        }
 
     }
 
@@ -23,16 +27,16 @@ public class Lines : MonoBehaviour
         //line
         if(_current) _current.Hide();
 
-        var line = Instantiate(_prefab, transform, false);
+        var line = Instantiate(_prefabs[_index%_prefabs.Length], transform, false);
         line.Init();
         line.gameObject.SetActive(true);
-        
+        _index++;
 
         _current = line;
 
         _lines.Add(line);
 
-        if(_lines.Count > 50){
+        if(_lines.Count > 20){
             
             Destroy(_lines[0].gameObject);
             _lines.RemoveAt(0);

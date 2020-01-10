@@ -1,4 +1,4 @@
-﻿Shader "Custom/CubemapTest"
+﻿Shader "Custom/CubemapTest2"
 {
     Properties {
         // キューブマップテクスチャのプロパティ

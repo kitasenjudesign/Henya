@@ -3,27 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TubeBrush : BrushBase{
+public class TubeBrushBase : BrushBase{
 
-    protected Mesh _mesh;
-    [SerializeField] protected Mesh _srcMesh;
-    [SerializeField] protected Vector3[] _vertices;
-    [SerializeField] protected List<Vector3> _positions;
-    [SerializeField] protected Vector3 _pos;
-    [SerializeField] protected float _debugLength = 1f;
-    [SerializeField] protected float _width = 1f;
-    protected Vector3[] _tangents;    
-    protected Vector3[] _normals;
-    protected Vector3[] _binormals;
-    [SerializeField] protected Camera _camera;
-    protected MousePosition _mouse;
-    protected VerletRope _rope;
+    private Mesh _mesh;
+    [SerializeField] private Mesh _srcMesh;
+    [SerializeField] private Vector3[] _vertices;
+    [SerializeField] private List<Vector3> _positions;
+    [SerializeField] private Vector3 _pos;
+    [SerializeField] private float _debugLength = 1f;
+    [SerializeField] private float _width = 1f;
+    private Vector3[] _tangents;    
+    private Vector3[] _normals;
+    private Vector3[] _binormals;
+    [SerializeField] private Camera _camera;
+    private MousePosition _mouse;
     //private MouseUtil _mouse;
 
-    protected const int W = 150;//80;
-    protected const int H = 10;//20;
-    protected ProjObj _projObj;
-    protected bool _isHide = false;
+    private const int W = 150;//80;
+    private const int H = 10;//20;
+    private ProjObj _projObj;
+    private bool _isHide = false;
     private bool _isInit = false;
     [SerializeField] private MeshRenderer _renderer;
     [SerializeField] private Slider _sliderDist;
@@ -35,11 +34,10 @@ public class TubeBrush : BrushBase{
         if(_isInit) return;
         _isInit=true;
 
-        _rope = new VerletRope();
 
         _mesh = MeshUtil.CloneMesh(_srcMesh,"test");
 
-        _width = _width*(0.7f + 0.3f*Random.value);
+        //_width = _width*(0.1f + 0.9f*Random.value);
 
         var bounds = new Bounds();
         bounds.size = new Vector3(1000f,1000f,1000f);
@@ -84,10 +82,25 @@ public class TubeBrush : BrushBase{
         //_tangents   = new Vector3[_mesh.tangents.Length]; 
         //var tangents = _mesh.tangents;
 
-        //Debug.Log("-------");
-        //Debug.Log(_vertices.Length);
-        //Debug.Log( (W+1) * (H+1) );
+        Debug.Log("-------");
+        Debug.Log(_vertices.Length);
+        Debug.Log( (W+1) * (H+1) );
 
+        //_projObj = GetComponent<ProjObj>();
+
+        /* 
+        for(int i=0;i<_normals.Length;i++){
+            //_normals[i] = 
+            var t = tangents[i];
+            _tangents[i] = new Vector3(
+                t.x,t.y,t.z
+            );
+            var tangent = tangents[i];
+            var normal = _normals[i];
+
+            Debug.Log(i + " _ " + _normals.Length);
+            _binormals[i] = Vector3.Cross(tangent, normal);
+        }*/
 
     }
 
@@ -97,11 +110,6 @@ public class TubeBrush : BrushBase{
 
 
     public void Hide(){
-        
-        if(!_isHide){
-            _rope.Init(_mouse._positions.ToArray());
-        }
-
         _isHide=true;
     }
 
@@ -110,29 +118,22 @@ public class TubeBrush : BrushBase{
     void Update(){
 
         //if( _isFinish ) return;
-        //if( _isHide ){
-        //    return;
-        //}
+        if( _isHide ) return;
 
         //http://karaagedigital.hatenablog.jp/entry/2016/09/22/201900
 
-        if(_isHide){
-            
-            _rope.Update();
-            _positions = _rope._positions;
-            //return;
-
-        }else{
-
-            _mouse.Upadate(_camera, _sliderDist.value);
-            _positions = _mouse._positions;
-            
-        }    
+        
+        _mouse.Upadate(_camera, _sliderDist.value);
+        _positions = _mouse._positions;
+        
 
         if(_mouse.isFinish) Hide();
 
         if(_positions.Count==0){
+            
+            //_renderer.enabled = false;
             return;
+
         }
 
 
@@ -151,7 +152,6 @@ public class TubeBrush : BrushBase{
         }
 
         _vertices   = _mesh.vertices;
-
         int idx = 0;
         for(int i=0;i<W+1;i++){
 
@@ -226,7 +226,7 @@ public class TubeBrush : BrushBase{
                 float sin = Mathf.Sin( -rad + Mathf.PI * 0.5f ); 
 
                 //normal と binormal 方向に。
-                float ww = i==0 ? 0 : _width * _sliderWidth.value;
+                float ww = i==0 ? 0 : _width;
 
                 Vector3 v = ww * (
                     cos * normal + sin * binormal
@@ -240,11 +240,9 @@ public class TubeBrush : BrushBase{
             }
 
             //debug用
-            #if UNITY_EDITOR
-                Debug.DrawLine (basePos, basePos + 0.1f * normal, Color.red);
-                Debug.DrawLine (basePos, basePos + 0.1f * tangent, Color.green);
-                Debug.DrawLine (basePos, basePos + 0.1f * binormal, Color.blue);
-            #endif
+            Debug.DrawLine (basePos, basePos + 0.1f * normal, Color.red);
+            Debug.DrawLine (basePos, basePos + 0.1f * tangent, Color.green);
+            Debug.DrawLine (basePos, basePos + 0.1f * binormal, Color.blue);
 
         }
 
@@ -252,8 +250,30 @@ public class TubeBrush : BrushBase{
         _mesh.RecalculateNormals();
         _mesh.RecalculateTangents();
 
-    }
 
+        /* 
+        //奥行き
+            for(int i=0;i<_vertices.Length;i++){
+
+                int idxX = i % 21;
+                int idxY = Mathf.FloorToInt((float)i/21f);
+
+
+                //copy previus
+                _normals[i] = _normals[i - 1];
+                _binormals[i] = _binormals[i - 1];
+
+                //var rot = _mouse.rotations[i]
+
+                //_mouse.positions[ i ];
+                var axis = Vector3.Cross(tangents[i - 1], tangents[i]);
+                
+                //tangentを計算して、、ノーマルを計算する
+
+            }
+        */
+
+    }
 
 	Matrix4x4 makeRotationAxis(Vector3 axis, float angle) { // XXX ANSELM TODO - implication of NEW? also row/order?
 	

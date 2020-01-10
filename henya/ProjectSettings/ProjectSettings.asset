@@ -166,7 +166,7 @@ PlayerSettings:
     Standalone: com.unity.arfoundation.samples
     iPhone: com.kitasenjudesign.henya
   buildNumber:
-    iPhone: 26
+    iPhone: 48
   AndroidBundleVersionCode: 1
   AndroidMinSdkVersion: 24
   AndroidTargetSdkVersion: 0

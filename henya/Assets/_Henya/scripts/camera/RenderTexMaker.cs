@@ -6,10 +6,15 @@ public class RenderTexMaker : MonoBehaviour
 {
     [SerializeField] public RenderTexture _tex;
     [SerializeField] private Shader _shader;
-    private Material _mat;
+    //private Material _mat;
     void Start(){
 
-        _mat = new Material(_shader);
+        _tex = new RenderTexture(
+            Mathf.FloorToInt( Screen.width * 0.5f ), 
+            Mathf.FloorToInt( Screen.height * 0.5f ),
+            0
+        );
+        //_mat = new Material(_shader);
 
     }
 

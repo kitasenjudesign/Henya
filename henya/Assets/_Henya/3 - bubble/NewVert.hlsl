@@ -10,7 +10,7 @@
             float radX = (-atan2(vv.z+0.001, vv.x) + 3.1415 * 0.5); //+ vv.y * sin(_count) * nejireX;//横方向の角度
             float radY = asin(vv.y / amp);
 
-            float dAmp	= snoise( vv.xyz*1.3 + time ) * ampp;
+            float dAmp	= snoise( vv.xyz*2 + time ) * ampp;
             
             amp += dAmp;// * step(_Th,dAmp);// * _DeformRatio;
 
